@@ -1,382 +1,161 @@
 
-
-/*
- * *** Wyatt Harris - COMP272-001 ***
+/**********************************************************
  *
- * Homework # 2 (Programming Assignment). This Java class defines a few basic
- * manipulation operations of a binary trees.
+ * Place your name / section number in the 'HW2.java' file
+ * (NOT this file). This main routine is a driver routine for
+ * testing the methods in the file 'HW1.java'.
  *
- * ONLY MODIFY THIS FILE (NOT 'Main.Java')
+ * DO NOT MODIFY THIS FILE
  *
- */
+ *********************************************************/
 
-import java.util.Queue;
-import java.util.LinkedList;
+public class Main {
 
-/*
- * Class BinaryTree
- *
- * This class defines a binary tree object; it is a tree structure where every
- * node as at most two child nodes, which form the tree branches. That implies
- * that each node within the tree has a degree of 0, 1, or 2. A node of degree
- * zero (0) is called a terminal node, or leaf node.
- *
- * Each non-leaf node is often called a branch node, which will have  either one or
- * two children (a left and right child node). There is no order guarantee within
- * this basic binary tree object. Given that this binary object is NOT a Binary Search Tree (BST), there is
- * no guarantee on order in the tree.
- *
- * As just stated, the insert method does NOT guarantee the order within the tree, but
- * its logic attempts to follow the rules of BSTs -- meaning the insert method will traverse
- * the binary tree searching for a location to insert the new Node using traversal
- * logic similar to BSTs. But again, this is not a BST, so there is no guarantee that
- * the tree's order maintains that defined by a BST.
- *
- * Public methods:
- *  void deleteTree()      - deletes the tree.
- *  Node insert(int data)  - inserts a new node into the tree containing value 'data'.
- *  String preOrder()      - return the tree in 'preorder' traversal in a String object.
- *
- * The following methods you will complete:
- *  void replaceValue(int k, int l) - if data value 'k' is in tree, replace with data
- *                           value 'l'; for simplicity at the moment, do not re-organize
- *                           the tree based on new value which means this operation may
- *                           violate the binary tree definition.
- *  int findMin()          - returns the small data value stored in the tree.
- *  int nodesGT(int val)   - return the number of nodes in the tree that have a data value
- *                           greater than 'val'.
- *  double average()       - return the average data value of all data values stored in
- *                           the tree.
- */
+  /*
+   * Function main() should be used for your UNIT TESTING. Feel free to change
+   * the code here in order to enhance your testing and / or add debugging code.
+   * However, your program must pass the existing tests provided in order to
+   * get 100%.
+   */
+  
+  public static void main(String[] args) {
+      int     assignmentScore = 0;
+      boolean errorFlag = false;
+      BinaryTree tree1 = new BinaryTree();
+      BinaryTree tree2 = new BinaryTree();
 
-public class BinaryTree {
+      System.out.println("\nProgram test driver starting  ...");
 
-    // Constructors
-    public BinaryTree() {
-        root = null;
-    }
-    public BinaryTree(Node node) {
-        root = node;
-    }
+      // Initial population of the binary tree
+      tree1.insert(50);
+      tree1.insert(55);
+      tree1.insert(2);
+      tree1.insert(15);
+      tree1.insert(20);
+      tree1.insert(0);
+      tree1.insert(99);
+      tree1.insert(3);
+      tree1.insert(45);
+      tree1.insert(8);
 
-    /*
-     * Class Node
-     *
-     * The node object definition for each node of the bin ary tree.
-     */
+      // Validate nothing changed in HW2.java such that the tree was built incorrectly.
+      String treeContents = tree1.preOrder();
+      if ( ! treeContents.toString().equals("50 55 15 3 45 20 8 2 0 99 ") ) {
+          System.out.println("HW2.java was modified resulting incorrectly constructing the tree!");
+          return;
+      }
 
-    static class Node {
+      /**************************************
+       *
+       * Testing of the replaceValue method
+       *
+       ***************************************/
 
-        Node(int d) {
-            data = d;
-            left = null;
-            right = null;
-        }
+      // Replace values in the binary tree constructed above.
 
-        Node(int d, Node l, Node r) {
-            data = d;
-            left = l;
-            right = r;
-        }
+      tree1.replaceValue(3, -3);
+      tree1.replaceValue(0, -11);
+      tree1.replaceValue(2, 99);
 
-        public int data;
-        public Node left;
-        public Node right;
+      // Validate the tree was updated correctly.
+      treeContents = tree1.preOrder();
+      if ( ! treeContents.toString().equals("50 55 15 -3 45 20 8 99 -11 99 ") ) {
+          System.out.println("Failure (1): replaceValue method failed testing!");
+          errorFlag = true;
+      }
 
-    }   /* End Class Node */
+      // Adjust assignment score
+      if ( ! errorFlag )
+          assignmentScore += 25;
+      else
+          errorFlag = false;
 
 
-    public Node root;
+      /**************************************
+       *
+       * Testing of the findMin method
+       *
+       ***************************************/
 
-    public void deleteTree() {
-        root = null;
-    }
+      // find the minimum value from tree1 used in previous test, should be -11
+      if ( tree1.findMin() != -11 ) {
+          System.out.println("Failure (2): findMin method failed testing!");
+          errorFlag = true;
+      }
 
-    public void replaceValue(int oldVal, int newVal) {
-        replaceValueHelper(root, oldVal, newVal);
-    }
+      // Construct a second binary tree, and use that for testing as well
+      tree2.insert(5);
+      tree2.insert(-6);
+      tree2.insert(-24);
+      tree2.insert(32);
+      tree2.insert(21);
+      tree2.insert(12);
 
-    public int findMin() {
-        return findMinHelper(root);
-    }
+      // find the minimum value from tree that was just created, should be -24
+      if ( tree2.findMin() != -24 ) {
+          System.out.println("Failure (3): findMin method failed testing!");
+          errorFlag = true;
+      }
 
-    public int nodesGT(int val) {
-        return nodesGTHelper(root, val);
-    }
-
-
-    /*
-     * public method insert
-     *
-     * The method will insert a node into the binary tree containing the value
-     * passed in as a parameter, 'data'. This insert routine maintains the
-     * form of the binary tree which maintains teh property of a 'complete binary'
-     * tree.
-     *
-     * The property basically implies that for every node in the tree:
-     *   1) every node in the tree has 2 children, except for possibly the last level.
-     *   2) and on the last level, all nodes are as far left as possible.
-     *
-     * There are no order properties of a basic binary tree.
-     *
-     * This method uses a breath first search of the binary tree to locate the
-     * location of where to insert the new node. This approach basically starts at
-     * the root, and searches level by level until the next free spot for the insertion.
-     * This approach maintains the 'complete tree' property of the binary tree.
-     */
-
-    Node insert(int data) {
-
-        Node tempNode = new Node(data);
-
-        // If tree is empty, insert new node as the root.
-        if (root == null)
-            return root = tempNode;
-
-        // Create a queue to do level order traversal
-        Queue<Node> queue = new LinkedList<>();
-        queue.add(root);
-
-        // Do level order traversal
-        while (!queue.isEmpty()) {
-            Node front = queue.peek();
-
-            if (front.left == null) {
-                front.left = tempNode;
-                break;
-            } else if (front.right == null) {
-                front.right = tempNode;
-                break;
-            } else {
-                // If front node in queue has both left and right
-                // children, remove it from the queue.
-
-                queue.remove();
-            }
-
-            // Enqueue the left and right children of teh current node
-            if (front.left != null)
-                queue.add(front.left);
-
-            if (front.right != null)
-                queue.add(front.right);
-        }
-
-        return tempNode;
-
-    } // End method insert
+      // Adjust assignment score
+      if ( ! errorFlag )
+          assignmentScore += 25;
+      else
+          errorFlag = false;
 
 
-    /*
-     * Public method preOrder()
-     *
-     * This method will generate a String object containing a copy of the tree's
-     * data values in preorder traversal format. If tree is empty, and empty
-     * String object (e.g., "") is returned. Else the String object contains
-     * the data values, separated by a space.
-     *
-     * This public method is simply wrapper for the preOrderHelper private method
-     * which does the actual work. The public wrapper method simply passes the root
-     * of the tree to helper method.
-     */
+      /**************************************
+       *
+       * Testing of the nodesGT method
+       *
+       ***************************************/
 
-    public String preOrder() {
-        return preOrderHelper(root);
-    }
+      // find the number of nodes in tree 1 having a data value > 20, should be 5
+      if ( tree1.nodesGT(20) != 5 ) {
+          System.out.println("Failure (4): nodesGT method failed testing!");
+          errorFlag = true;
+      }
 
-    public String preOrderHelper(Node node) {
-        if (node == null) {
-            return "";
-        }
-        return node.data + " " + preOrderHelper(node.left)
-                + preOrderHelper(node.right);
-    }
+      // find the number of nodes in tree 2 having a data value > 20, should be 2
+      if ( tree2.nodesGT(20) != 2 ) {
+          System.out.println("Failure (5): nodesGT method failed testing!");
+          errorFlag = true;
+      }
 
-
-    /***********************************************************
-     *
-     * YOUR CODE GOES BELOW
-     *
-     * THERE IS NO NEED TO CHANGE ANY CODE ABOVE. DO NOT FORGET TO PLACE
-     * YOUR NAME AND SECTION NUMBER AT THE TOP OF THE FILE.
-     *
-     * YOU ARE TO WRITE THE METHODS:
-     *    - replaceValue
-     *    - findMin
-     *    - NodesGT
-     *    - average
-     *
-     ***********************************************************/
+      // Adjust assignment score
+      if ( ! errorFlag )
+          assignmentScore += 25;
+      else
+          errorFlag = false;
 
 
-    /*
-     * private method replaceValueHelper
-     *
-     * This method will traverse the tree using a depth first search
-     * approach, and for each node found with the value of 'oldVal',
-     * replace it (update teh value in place), with the provided 'newVal'.
-     *
-     * Depth first search of the tree is based on recursion. This will result
-     * in very few lines of code.
-     *
-     */
+      /**************************************
+       *
+       * Testing of the average method
+       *
+       ***************************************/
 
-    private void replaceValueHelper(Node node, int oldVal, int newVal) {
+      // find the number of nodes in tree 1 having a data value > 20, should be 5
+      if ( tree1.average() != 37.7 ) {
+          System.out.println("Failure (6): nodesGT method failed testing!");
+          errorFlag = true;
+      }
 
-        // ADD YOUR CODE HERE -- USE DEPTH FIRST SEARCH OF
-        // BINARY TREE (WHICH IS BASED ON RECURSION)
+      // find the number of nodes in tree 2 having a data value > 20, should be 2
+      if ( tree2.average() != 6.666666666666667 ) {
+          System.out.println("Failure (7): nodesGT method failed testing!");
+          errorFlag = true;
+      }
 
-        //Going to abuse the code you already wrote.
-        //It doesn't matter if it's pre/post/in-order, so I can just steal the code for pre-order.
-
-        if(node==null){
-            return;
-        }
-        else{
-            if(node.data==oldVal){
-                node.data = newVal;
-            }
-            //Mwahahahaha
-            replaceValueHelper(node.left, oldVal, newVal);
-            replaceValueHelper(node.right, oldVal, newVal);
-        }
-    }
+      // Adjust assignment score
+      if ( ! errorFlag )
+          assignmentScore += 25;
+      else
+          errorFlag = false;
 
 
-    /*
-     * private method findMinHelper()
-     *
-     * This method will traverse the tree using depth first search traversal and
-     * return the minimum data value in the binary tree. If the tree is empty, the
-     * value 'Integer.MAX_VALUE' is returned. Recall that this is not a binary
-     * search Tree (BST), so it does not have the additional property that the
-     * smaller data values always traverse the left child. So that implies all
-     * nodes in this tree must be traversed.
-     *
-     * Depth first search of the tree is based on recursion. This will result
-     * in very few lines of code.
-     */
-    private int findMinHelperRecursive(Node node, int min) {
-        int newMin = min;
-        if(node==null){
-            return min;
-        }
-        if(node.data<min){
-            newMin=node.data;
-        }
-        int possible = findMinHelperRecursive(node.left, newMin);
-        int possible2 = findMinHelperRecursive(node.right, newMin);
-        //This code is probably a bit clunky, but I don't really care.
-        if (possible < newMin) {
-            newMin = possible;
-        }
-        if (possible2 < newMin) {
-            newMin = possible2;
-        }
-        return newMin;
-    }
+      System.out.println("\nFinal assignment score is " + assignmentScore );
 
-    private int findMinHelper(Node node) {
-        // ADD YOUR CODE HERE -- USE DEPTH FIRST SEARCH OF
-        // BINARY TREE (WHICH IS BASED ON RECURSION)
-        int min = Integer.MAX_VALUE;
-        int newMin = findMinHelperRecursive(node, min);
-        return newMin;
-    }
+  } // end main()
 
-
-    /*
-     * private method nodeGTHelper()
-     *
-     * This method will traverse the tree using depth first search traversal and
-     * return a count on the number of nodes that contain a data value larger
-     * than the parameter 'val'.
-     *
-     * If the tree is empty, return 0.
-     *
-     * Depth first search of the tree is based on recursion. This will result
-     * in very few lines of code.
-     */
-    private int findGTHelperRecursive(Node node, int prevCount, int val) {
-        int count=prevCount;
-        if(node==null){
-            return count;
-        }
-        if(node.data>val){
-            count += 1;
-        }
-
-        count = findGTHelperRecursive(node.left, count, val);
-        count = findGTHelperRecursive(node.right, count, val);
-
-        return count;
-    }
-    private int nodesGTHelper(Node node, int val) {
-
-        // ADD YOUR CODE HERE -- USE DEPTH FIRST SEARCH OF
-        // BINARY TREE (WHICH IS BASED ON RECURSION)
-
-        // return -1; // RECALL, IF TREE IS EMPTY, RETURN -1
-        if (node == null) {
-            return -1;
-        }
-        int origCount = 0;
-        int newCount = findGTHelperRecursive(node, origCount, val);
-        return newCount;
-    }
-
-
-    /*
-     * public method average()
-     *
-     * This method will traverse the tree using depth first search traversal and
-     * return the average value contained in the binary tree. To easily perform a depth
-     * first traversal, it invokes the helper method, averageHelper(), which is the
-     * method that should be called recursively. If the tree is empty, 0 should be
-     * returned.
-     *
-     * IMPORTANT NOTE:
-     * The helper method should return an array of two integer values. In index
-     * location [0] is the sum of all data values in the tree. And in index
-     * location [1] is the count of nodes.
-     *
-     * As can be seen in the method average() immediately below, the returned average
-     * value is calculated as "sum / count".
-     *
-     * Depth first search of the tree is based on recursion. This will result
-     * in very few lines of code within the helper method.
-     */
-
-    public double average() {
-        int[] sumAndCount = averageHelper(root);
-        return (double) sumAndCount[0] / sumAndCount[1];
-    }
-    private int[] averageHelperRecursive(Node node, int[] array){
-        if (node == null) {
-            return array;
-        }
-        array[0] += node.data;
-        array[1] ++;
-        int[] newArray = averageHelperRecursive(node.left, array);
-        array[0] = newArray[0];
-        array[1] = newArray[1];
-        int[] newArray2 = averageHelperRecursive(node.right, array);
-        array[0] = newArray[0];
-        array[1] = newArray[1];
-        return array;
-    }
-    private int[] averageHelper(Node n) {
-
-        // ADD YOUR CODE HERE -- USE DEPTH FIRST SEARCH OF
-        // BINARY TREE (WHICH IS BASED ON RECURSION)
-        int[] whatever = {0,0};
-
-        int[] whatever2 = averageHelperRecursive(n, whatever);
-        
-        // RECALL, IF THE TREE IS EMPTY, RETURN 0 FOR BOTH THE SUM AND
-        // COUNT LOCATIONS IN THE RETURNED ARRAY AS SHOWN BELOW, ELSE
-        // THE 'SUM' IS RETURNED IN INDEX LOCATION 0, AND COUNT IS LOCATION 1
-        return whatever2;
-
-    }
-}
+} // end class Main()
